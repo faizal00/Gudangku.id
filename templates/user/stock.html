@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gudangku.id</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    {%include '/user/navigation.html'%}
+    {%block content%}
+    <div class="container">
+        <div style="justify-content: center;align-items:center;" class="row">
+            <div style="background-color: white;padding:4% 4%;margin-top:25%;border-radius:15px;box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;margin:3%"
+                class="col-md-12">
+                <h3>Stock</h3>
+                <hr>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ category }}, {{ message }}
+                </div>
+                {% endfor %}
+                {% endwith %}
+                <table class="table table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>Nama Barang</th>
+                            <th>Supplier</th>
+                            <th>Qty</th>
+                            <th>Satuan</th>
+                            <th>Status</th>
+                            <th>Last Edit</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in data %}
+                        <tr>
+                            <td>{{ stock.nama }}</td>
+                            <td>{{ stock.supplier }}</td>
+                            <td>{{ stock.qty }}</td>
+                            <td>{{ stock.satuan }}</td>
+                            <td>
+                                {% if stock.status == "Ready Stock" %}
+                                <span class="badge bg-primary mt-3">{{ stock.status }}</span>
+                                {% elif stock.status == "Out of Stock" %}
+                                <span class="badge bg-danger mt-3">{{ stock.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: x-small;">{{ stock.edited }} | <span
+                                    style="font-size: xx-small;">{{stock.edited_time}}</span> </td>
+                            <td>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                    data-bs-target="#edit{{ stock._id }}">Restock</button> |
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                    data-bs-target="#drop{{ stock._id }}">Drop</button> |
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#void{{ stock._id }}">Void</button>
+                            </td>
+                        </tr>
+                        <div class="edit">
+                            <div class="modal fade" id="edit{{ stock._id }}" tabindex="-1" aria-labelledby="edit"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="logoutLabel">Stock Masuk</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/addstock/{{ stock._id }}" method="POST">
+                                                <input type="text" value="{{ stock.nama }}" class="form-control"
+                                                    id="nama" name="nama" placeholder="Nama Barang" readonly>
+                                                <input type="text" value="{{ stock.kategori }}"
+                                                    class="form-control mt-3" id="kategori" name="kategori"
+                                                    placeholder="Kategori" hidden>
+                                                <input type="text" value="{{ stock.supplier }}"
+                                                    class="form-control mt-3" id="supplier" name="supplier"
+                                                    placeholder="Supplier" readonly>
+                                                <input type="number" min="0" class="form-control mt-3" name="qty"
+                                                    placeholder="Kuantitas">
+                                                <div class="form-check form-check-inline mt-3">
+                                                    <input checked class="form-check-input" type="radio" name="satuan"
+                                                        id="pcs" value="{{ stock.satuan }}">
+                                                    <label class="form-check-label" for="pcs">{{ stock.satuan }}</label>
+                                                </div>
+                                                <button type="submit" style="width: 100%;"
+                                                    class="btn btn-dark mt-3">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="drop">
+                            <div class="modal fade" id="drop{{ stock._id }}" tabindex="-1" aria-labelledby="drop"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="logoutLabel">Stock Keluar</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/dropstock/{{ stock._id }}" method="POST">
+                                                <input type="text" value="{{ stock.nama }}" class="form-control"
+                                                    id="nama" name="nama" placeholder="Nama Barang" readonly>
+                                                <input type="text" value="{{ stock.kategori }}"
+                                                    class="form-control mt-3" id="kategori" name="kategori"
+                                                    placeholder="Kategori" hidden>
+                                                <input type="text" value="{{ stock.supplier }}"
+                                                    class="form-control mt-3" id="supplier" name="supplier"
+                                                    placeholder="Supplier" hidden>
+                                                <input type="number" min="0" class="form-control mt-3" name="qty"
+                                                    placeholder="Kuantitas">
+                                                <div class="form-check form-check-inline mt-3">
+                                                    <input checked class="form-check-input" type="radio" name="satuan"
+                                                        id="pcs" value="{{ stock.satuan }}">
+                                                    <label class="form-check-label" for="pcs">{{ stock.satuan }}</label>
+                                                </div>
+                                                <div class="input-group mt-3">
+                                                    <select class="form-select" id="mitra" name="mitra">
+                                                        <option selected>Mitra</option>
+                                                        {% for mit in mitra %}
+                                                        <option>{{mit.mitra}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <button type="submit" style="width: 100%;"
+                                                    class="btn btn-dark mt-3">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="void">
+                            <div class="modal fade" id="void{{ stock._id }}" tabindex="-1" aria-labelledby="drop"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="logoutLabel">Void</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Anda yakin ingin mengosongkan stock {{stock.nama}}?</p>
+                                            <form action="/voidstock/{{ stock._id }}" method="POST">
+                                                <button style="float: right;" type="submit" class="btn btn-danger">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {%endblock%}
+</body>
+</html>
